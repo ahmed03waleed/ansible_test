@@ -1,0 +1,34 @@
+---
+
+- hosts: all
+  become: true
+  tasks:
+
+  - name: Remove Apache (httpd) package
+    dnf:
+      name: httpd
+      state: absent
+
+  - name: Stop and Disable Apache service
+    service:
+      name: httpd
+      enabled: no
+      state: stopped
+
+  - name: Remove HTTP (port 80) in firewall
+    firewalld:
+      service: http
+      permanent: yes
+      state: disabled
+
+  - name: Reload firewall to apply changes
+    service:
+      name: firewalld
+      state: reloaded
+
+  - name: Remove PHP and PHP-FPM for Apache
+    dnf:
+      name: 
+        - php
+        - php-fpm
+      state: absent
