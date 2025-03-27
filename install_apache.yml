@@ -5,13 +5,61 @@
   tasks:
 
   - name: Update repository
+    apt:
+      update_cache: yes
+    when: ansible_distribution == "Ubuntu"
+
+  - name: Install Apache (apache2) package
+    apt:
+      name: apache2
+      state: latest
+    when: ansible_distribution == "Ubuntu"
+
+  - name: Enable and start Apache service
+    service:
+      name: apache2
+      enabled: yes
+      state: started
+    when: ansible_distribution == "Ubuntu"
+
+  - name: Allow HTTP (port 80) in firewall
+    firewalld:
+      service: http
+      permanent: yes
+      state: enabled
+
+  - name: Reload firewall to apply changes
+    service:
+      name: firewalld
+      state: reloaded
+
+  - name: Add PHP support for Apache
+    apt:
+      name: libapache2-mod-php
+      state: present
+    when: ansible_distribution == "Ubuntu"
+
+  - name: Enable and start PHP service
+    service:
+      name: libapache2-mod-php
+      enabled: yes
+      state: started
+    when: ansible_distribution == "Ubuntu"
+
+
+
+
+
+  - name: Update repository
     dnf:
       update_cache: yes
+    when: ansible_distribution == "Rocky"
 
   - name: Install Apache (httpd) package
     dnf:
       name: httpd
-      state: present
+      state: latest
+    when: ansible_distribution == "Rocky"
 
   - name: Enable and start Apache service
     service:
@@ -30,15 +78,17 @@
       name: firewalld
       state: reloaded
 
-  - name: Install PHP and PHP-FPM for Apache
+  - name: Add PHP support for Apache
     dnf:
-      name: 
-        - php
-        - php-fpm
+      name: php
       state: present
+    when: ansible_distribution == "Rocky"
 
-  - name: Enable and start PHP-FPM service
+  - name: Enable and start PHP service
     service:
       name: php-fpm
       enabled: yes
       state: started
+    when: ansible_distribution == "Rocky"
+
+
