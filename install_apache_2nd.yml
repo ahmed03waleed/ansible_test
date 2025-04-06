@@ -4,13 +4,24 @@
   become: true
   tasks:
 
-  - name: Update and Install Apache and php
-    package:
+  - name: install and update apache and php for Ubuntu servers
+    apt:
       name:
-        - "{{ apache_package }}"
-        - "{{ php_package}}"
+        - apache2
+        - libapache2-mod-php
       state: latest
       update_cache: yes
+    when: ansible_distribution == "Ubuntu"
+
+
+  - name: install and update apache and php for Rocky servers
+    dnf:
+      name:
+        - httpd
+        - php
+      state: latest
+      update_cache: yes
+    when: ansible_distribution == "Rocky"
 
   - name: Enable and start Apache service
     service:
@@ -19,18 +30,20 @@
         - httpd
       enabled: yes
       state: started
-    when: ansible_distribution == "Ubuntu"
+    when: ansible_distribution == ["Ubuntu" , "Rocky"]
 
   - name: Allow HTTP (port 80) in firewall
     firewalld:
       service: http
       permanent: yes
       state: enabled
+    when: ansible_distribution == "Rocky"
 
   - name: Reload firewall to apply changes
     service:
       name: firewalld
       state: reloaded
+    when: ansible_distribution == "Rocky"
 
   - name: Enable and start PHP service
     service:
@@ -39,5 +52,5 @@
         - php-fm
       enabled: yes
       state: started
-    when: ansible_distribution == "Ubuntu"
+    when: ansible_distribution == ["Ubuntu" , "Rocky"]
 
